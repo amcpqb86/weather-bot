@@ -1,12 +1,15 @@
-// Constantes
 const prefix = "!weather";
-var now = new Date();
-var heure = now.getHours();
+const now = new Date();
+const heure = now.getHours();
 
 // require
 const fetch = require("node-fetch");
-const discord = require('discord.js');
-const client = new discord.Client;
+const {Client, IntentsBitField} = require('discord.js');
+
+const myIntents = new IntentsBitField();
+myIntents.add(IntentsBitField.Flags.GuildPresences, IntentsBitField.Flags.GuildMembers);
+
+const client = new Client({intents: myIntents});
 const keys = require('./keys.json');
 const request = require("request");
 let count = 1;
@@ -17,18 +20,18 @@ client.on('ready', () => {
 
 client.on('message', message => {
     if (message.content.startsWith(prefix)) {
-        var city = message.content.slice(prefix.length).trim();
-        let url = `http://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${keys.TOKEN_WEATHER}&units=metric&lang=fr`;
+        const city = message.content.slice(prefix.length).trim();
+        let url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${keys.TOKEN_WEATHER}&units=metric&lang=fr`;
         request(url, function(err, response, body) {
             if (err) {
                 message.channel.send(":x: Erreur de connexion à l'API ! :x:");
             } else {
-                var json = JSON.parse(body);
+                const json = JSON.parse(body);
                 try {
-                    var temp = json["main"]["temp"];
-                    var description = json["weather"][0]["main"];
-                    var emojiName = "temp";
-                    var iconName = "temp";
+                    const temp = json["main"]["temp"];
+                    let description = json["weather"][0]["main"];
+                    let emojiName = "temp";
+                    let iconName = "temp";
                     switch (description) {
                         case 'Thunderstorm':
                             emojiName = "cloud_lightning";
@@ -66,7 +69,7 @@ client.on('message', message => {
                     } else {
                         iconName += "d";
                     }
-                    var emoji = (`:${emojiName}:`);
+                    const emoji = (`:${emojiName}:`);
 
                     message.channel.send({
                         embed: {
